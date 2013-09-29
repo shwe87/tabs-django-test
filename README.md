@@ -1,6 +1,6 @@
 To try the add-on, just drag the tabs-django-test.xpi to your mozilla firefox browser.
 
-1) Function "List open tabs" will list the open tabs you are browsing.
+1) Function "List open tabs" will list the open tabs you are browsing.\r\n\r\n
 2) Function "List and send" will list the open tabs you are browsing and send them to Django server and save them there.
 
 Please take in mind that the function "List and send" of the add-on will only work if you do the following:

@@ -1,12 +1,18 @@
 /*
 This add-on will try to communicate with the Django Server created by me.
 */
-var data = require("sdk/self").data;
+
+//Mozilla sdk modules:
+var data = require("sdk/self").data;		
 var Request = require("sdk/request").Request;
 var openTabs = require("sdk/tabs");
 var windows = require("sdk/windows").browserWindows;
-var connectTo = 'http://localhost:8080/';
-var tabsList = new Array();
+
+//Variables
+var connectTo = 'http://localhost:8080/';	//Django server's URL
+var tabsList = new Array();			//A list of all tabs.
+
+
 
 /*Open some tabs automatically, to avoid doing it manually.*/
 openTabs.activeTab.url = "http://www.gmail.com";
@@ -16,7 +22,7 @@ openTabs.open("http://www.urjc.es");
 
 /**************Panel settings*************/
 var myPanel = require("sdk/panel").Panel({
-  width: 500,
+  width: 800,
   height: 500,
   contentScriptFile: data.url('send-django.js'),
   contentURL: "about:blank",
@@ -42,7 +48,7 @@ var myWidget = require("sdk/widget").Widget({
 function onClickWidget(){
     /*On click show the panel with the html content with the tab's list*/
     myPanel.contentURL = data.url('myPage.html');
-    //myPanel.port.emit('start','start');
+    myPanel.port.emit('start','start');
     /*myPanel.port.on('ready',function(msg){
     	console.log("READY!");
     
@@ -51,44 +57,40 @@ function onClickWidget(){
 }
 
 myPanel.port.on('tabsClicked',function(message){
-	console.log("List Tabs!!!");
-	//myPanel.show();
-	listTabs();
+	//The content-script lets know the add-on that the user has clicked the list button.
+	//So call ths function listTabs
+	tabsList = listTabs();
 });
 
 
 
 myPanel.port.on('sendClicked',function(messageToSend){
-	/*This is to send the tabs list to the server.*/
-	/*if (messageToSend == 'noTabs'){
-		listTabs();
-		//myPanel.port.emit('reponse','noSend');	
-	}
-	console.log(messageToSend);*/
-	listTabs();
+	/* Content-script lets know the add-on
+	 * that the user has clicked the list & send button.
+	 * This is to send the tabs' information to the server.*/
+	console.log("SEND CLICKED!!!!");
+	tabsList = listTabs();	//First get the open tabs' information.
 	for each(var tab in tabsList){
 		var URL = connectTo;
+		// Create the correct URL to save the tab's info:
 		URL = URL + 'save/' + tab.title + '|' + tab.url ;
-		//console.log('URL='+URL+'\n\n\n\n\n');
 		var sendMessage = Request({
 		    url: URL,
 		    contentType: 'text/html; charset=utf-8',
-		    //overrideMimeType: "text/plain; charset=latin1",
 		    onComplete: function (response) {
     			var answer = response.text;
-    			myPanel.port.emit('response',response.text);
+    			//Send the server's response to the content-script to handle it.
+    			myPanel.port.emit('response',response.text);	
  		    }
  		});
-		sendMessage.put();
+		sendMessage.put();	//Put the message on the server.
 	}
 });
 
 
 function listTabs() {
-	//console.log("HERE!!");
-	tabsList = new Array();
+	var listOfTabs = new Array();
 	var tabs = require("sdk/tabs");
-	var counter=0;
 	myPanel.port.emit('reset','reset');
 	//Clean the database in DJango server
 	var URL = connectTo;
@@ -96,27 +98,75 @@ function listTabs() {
 	var sendMessage = Request({
 		url: URL,
 		contentType: 'text/html; charset=utf-8',
-		//overrideMimeType: "text/plain; charset=latin1",
 		onComplete: function (response) {
     			var answer = response.text;
-    			//myPanel.port.emit('resp',response.text);
  		}
  	});
 	sendMessage.put();
-	console.log('Reset');
+	var numberOfTabs = tabs.length;
+	var countTabs = 0;
+	console.log("Number of tabs = " + numberOfTabs);
+	//For each tab handle the tab's info:
 	for each (var tab in tabs){
 		var tabInfo = new Array();
-		console.log(tab.url);
-		tabInfo[0] = tab.url;
-		tabInfo[1] = tab.title;
-		tabsList[counter] = tab;
-		counter++;
+		//console.log(tab.url);
+		tabInfo[0] = tab.url;	//the tabs url
+		tabInfo[1] = tab.title;	// the tab's title
+		tabInfo[2] = tab.id;	//unique id for this tab
+		//listOfTabs[counter] = tab;
+		//Create object with all the info which is serialazable JSON
+		var info = new Object();
+		info.id = tab.id;
+		info.title = tab.title;
+		info.url = tab.url;		
+		listOfTabs.push(info);
+		//counter++;
 		//JSON.stringify(tabInfo);		//Convert the array to JSON format because the port only can send serialazable JASON messages.
-		myPanel.port.emit('takeTabs',tabInfo);
+		//A tab's worker, used to get information and work on the tab.
+		worker = tab.attach({
+    			contentScriptFile: data.url("tab-access.js")
+   		});
+   		// Ask the worker's content-script for tab's cookies 
+    		worker.port.emit('giveCookies',tab.id);
+    		worker.port.on('takeCookies',function(cookiesInfo){
+    			countTabs++;
+    			//console.log("Count tabs " + countTabs);
+    			var thisTabsId = cookiesInfo.pop();
+    			//console.log("TABS ID = " + thisTabsId);
+    			//Lets search for the tab with thisTabsId in the listOfTabs.
+    			var pos = listOfTabs.map(function(e) { 
+    				return e.id; 
+    			}).indexOf(thisTabsId);
+    			
+    			//Once we have got the position of the tab with the id, lets save its cookies:
+    			listOfTabs[pos].cookies = cookiesInfo;
+    			 
+    			//console.log("Position of " + listOfTabs[pos].title + " = " + pos );
+    			/*for each (var savedInfo in listOfTabs){
+    				var savedId = savedInfo.id;
+    				if (savedId.match())
+    			
+    			
+    			}
+			/*for each (var cookie in cookiesInfo){
+				//console.log(title + "  " + cookie);	
+			}*/
+			
+			/*If we have saved information of all the tabs then send the information to the content-script*/
+			if(countTabs == numberOfTabs){
+				console.log("All cookies " + countTabs);
+				myPanel.port.emit('takeTabs',listOfTabs);
+			}
+		}); 
+		
+		/*while(!){
+			myPanel.port.emit('takeTabs',tabInfo);
+		}*/
 	}
+	return listOfTabs;
+}
 
-
-}  
+ 
 
 
 

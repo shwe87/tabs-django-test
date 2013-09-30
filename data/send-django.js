@@ -136,11 +136,12 @@ self.port.on('response',function(answer){
  * </ul>
 */
 
-var ul = document.createElement('ul');
-var listOfLinks = document.createAttribute('id');
-listOfLinks.value = 'listOfLinks';
-ul.setAttributeNode(listOfLinks);
+
 self.port.on('takeTabs',function(tabs){
+	var ul = document.getElementById('list');
+	//var listOfLinks = document.createAttribute('id');
+	//listOfLinks.value = 'listOfLinks';
+	//ul.setAttributeNode(listOfLinks);
 	//console.log(document.title);
 	//console.log("ARRAY " + tabs);
 	//var tabsInfo = JSON.parse(tabs);
@@ -162,14 +163,14 @@ self.port.on('takeTabs',function(tabs){
 	li.appendChild(a);
 	ul.appendChild(li);
 	//Insert it in the document's body, before the list button
-	document.body.insertBefore(ul,listButton);
+	//document.body.insertBefore(ul,listButton);
 
 		
 });
 
 /*List again the tabs*/
 self.port.on('reset',function(message){
-	var u = document.getElementById('listOfLinks');
+	var u = document.getElementById('list');
 	if (u != null){
 		//Remove all the "li"(tabs) elements who are child of ul
  		while (u.firstChild) {

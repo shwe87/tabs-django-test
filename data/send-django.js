@@ -66,15 +66,15 @@ self.port.on('start',function(message){
 					var listButton = document.getElementById('getTabsButton');
 					if(listButton != null){
 						console.log("EXISTE!!! 2");
-						listButton.addEventListener('click',function onClick(event){
+						/*listButton.addEventListener('click',function onClick(event){
 							console.log("CLICKED!!!");
 							self.port.emit('tabsClicked','noMessage');	
-						},false);
+						},false);*/
 						
 						//Uncomment one os these two: Click the button or send message saying someone has clicked the button.
-						//listButton.click();
+						listButton.click();
 						
-						self.port.emit('tabsClicked','noMessage');
+						//self.port.emit('tabsClicked','noMessage');
 					}
 					
   		//}, false)
@@ -146,7 +146,7 @@ self.port.on('takeTabs',function(tabs){
 	//console.log(document.title);
 	//console.log("ARRAY " + tabs);
 	//var tabsInfo = JSON.parse(tabs);
-	tabsList = tabs.slice(0);	//The best way to copy the array. Slice from element 0 to the end.
+	//tabsList = tabs.slice(0);	//The best way to copy the array. Slice from element 0 to the end.
 	console.log(tabsList.length);
 	for each (var tabsInfo in tabs){
 		var tabsURL = tabsInfo.url;
@@ -184,24 +184,35 @@ self.port.on('takeTabs',function(tabs){
 	
 	console.log("HERE");
 	buttonsList = new Array();
-	for(i=0;i<tabsList.length;i++){
-		buttonsList[i] = document.getElementById(tabsList[i].id);
-		console.log("ID " + tabsList[i].id);
+	for(i=0;i<tabs.length;i++){
+		buttonsList[i] = document.getElementById(tabs[i].id);
+		console.log("ID " + tabs[i].id + "  " + tabs[i].title);
 		if (buttonsList[i] != null){
-			console.log("NOT NULL");
+			//console.log("NOT NULL");
 			buttonsList[i].addEventListener('click',function(event){
-				console.log("CLICKED BUTTON");
+				console.log("CLICKED BUTTON " + this.id);
 				var cookieUL = document.getElementById('cookies');
-				//var ulText = document.createTextNode( tabsList[i].title + "Cookies:");
-				//cookieUL.appendChild(ulText);
-				console.log("1000");
-				for each (var cookie in tabsList[i].cookies){
-					console.log(cookie);
+				cookieUL.innerHTML = "";
+				console.log(i);
+				//if(cookieUL != null){console.log("1000 ");}
+				
+				var pos = tabs.map(function(e) { 
+    					return e.id; 
+    				}).indexOf(this.id);
+    				var cookieCenter = document.createElement('center');
+    				var cookieH1 = document.createElement('h1');
+    				var ulText = document.createTextNode( tabs[pos].title + " Cookies:");
+    				cookieH1.appendChild(ulText);
+    				cookieCenter.appendChild(cookieH1);
+				cookieUL.appendChild(cookieCenter);
+				for each (var cookie in tabs[pos].cookies){
+					//console.log(cookie);
 					var cookieLI = document.createElement('li');
 					var liText = document.createTextNode(cookie);
 					cookieLI.appendChild(liText);	
 					cookieUL.appendChild(cookieLI);			
 				}
+				//document.appendChild(cookieUL);
 			
 			});
 			/*buttonsList[i].onclick=function(){
@@ -223,7 +234,7 @@ self.port.on('takeTabs',function(tabs){
 		}
 		
 	}
-});
+},false);
 
 /*Now lets create the listeners for the cookies button for each tab*/
 

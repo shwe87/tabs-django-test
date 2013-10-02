@@ -25,10 +25,10 @@ Note: You can visit https://docs.djangoproject.com/en/dev/topics/install/ to see
 the latest release in the folder DJango (1.5.4; the one I used), so you just have to follow the instructions provided in the website.
 
 
-P.D: There are still bugs in this code & mozilla team has changed some of their add-on sdk code due to the bugs I faced
+P.D: There are still bugs in this code (because one of the features doesnt work although it's not noticable) & mozilla team has changed some of their add-on sdk code due to the bugs I faced
 when I was "creating" this add-o. So, if you want to check out the add-on without the bugs and you have the addon sdk
 installed (lastest release from github) then feel free to run the addon as:
   
   $ cfx -o run
   
-This will run the add-on with the changes included and thus adding the new features in the add-on.
+This will run the add-on with the changes included and thus add the new features in the add-on.

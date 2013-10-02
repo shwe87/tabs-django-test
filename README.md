@@ -1,4 +1,3 @@
-
 To try the add-on, just drag the tabs-django-test.xpi to your Mozilla Firefox Browser.
 
 1) Function "List open tabs" will list the open tabs you are browsing.
@@ -21,4 +20,4 @@ Please take in mind that the function "List and save" of the add-on will only wo
 
 
 Note: You can visit https://docs.djangoproject.com/en/dev/topics/install/ to see how you can install DJango. I've provided
-the latest release (1.5.4) and the one I used, so you just have to follow the instructions provided in the website.
+the latest release in the folder DJango (1.5.4; the one I used), so you just have to follow the instructions provided in the website.

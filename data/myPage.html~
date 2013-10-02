@@ -16,13 +16,18 @@ My page
 </ul>
 
 
-<center><button id="getTabsButton">List open tabs</button><br><br><br>
+<center><button id="getTabsButton">List open tabs</button><br><br>
+
+<button id="sendButton">List tabs & Save</button><br><br>
 
 
 
-<button id="sendButton">List & Send</button><br><br>
 <a id="django" href=""></a></center>
+<ul id="cookies">
+</ul>
 
+
+</ul>
 </body>
 
 

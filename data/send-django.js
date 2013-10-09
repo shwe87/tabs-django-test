@@ -35,6 +35,61 @@ if(bookmarkButton != null){
 
 }
 
+/*Handle the "History" button*/
+var historyButton = document.getElementById('getHistory');
+if(historyButton != null){
+	historyButton.onclick = function(){
+		self.port.emit('historyClicked','noMessage');	
+	};
+}
+
+self.port.on('takeHistory',function(listOfHistory){
+	var historyUL = document.getElementById('history');
+	for each(var history in listOfHistory){
+		var title = history.title;
+		var url = history.url;
+		var visited = history.visited;
+		var lastVisitedTimeInMicrosecs = history.time;
+		var iconURI = history.iconURI; // is null if no favicon available
+		//console.log("Script = " + history.title);
+		
+		
+		var historyLI = document.createElement('ul');
+		/*var historyType = document.createAttribute('type');
+		historyType.value = 'square';
+		historyLI.setAttributeNode(historyType);*/
+		var historyTitle = document.createElement('li');
+		//var historyTitle = document.createTextNode();
+		var titleText = document.createTextNode(title);
+		historyTitle.appendChild(titleText);
+		var urlLI = document.createElement('li');
+		var urlText = document.createTextNode(url);
+		urlLI.appendChild(urlText);
+		historyLI.appendChild(urlLI);
+		
+		
+		
+		var visitedLI = document.createElement('li');
+		var visitedText = document.createTextNode(visited);
+		visitedLI.appendChild(visitedText);
+		historyLI.appendChild(visitedLI);
+		
+		var lastLI = document.createElement('li');
+		var lastText = document.createTextNode(lastVisitedTimeInMicrosecs);
+		lastLI.appendChild(lastText);
+		historyLI.appendChild(lastLI);
+		
+		/*
+		var iLI = document.createElement('li');
+		var urlText = document.createTextNode(url);
+		urlLI.appendChild(urlText);
+		historyLI.appendChild(urlLI);*/
+		historyTitle.appendChild(historyLI);
+		historyUL.appendChild(historyTitle);
+	
+	}
+});
+
 
 self.port.on('takeBookmarks',function(listOfBookmarks){
 	var bookmarksUL = document.getElementById('bookmarks');
@@ -51,6 +106,23 @@ self.port.on('takeBookmarks',function(listOfBookmarks){
 		var bookmarkLI = document.createElement('li');
 		bookmarkLI.appendChild(bookmarkMain);
 		bookmarksUL.appendChild(bookmarkLI);
+		/*
+		<ul id='bookmarks'>
+		<li> main
+			<ul>
+			<li>
+			folder.title
+				<ul>
+				<li>
+				subfolder
+				</li>
+				</ul>
+			</li>
+			</ul>
+		</li>
+		</ul>
+		
+		*/
 		if (folders != null){
 			//console.log("Hay folders " + folders);
 			for each (var folder in folders){
@@ -101,7 +173,7 @@ self.port.on('takeBookmarks',function(listOfBookmarks){
 /*The following only works with cfx -o run */
 self.port.on('start',function(message){
 	console.log("START");
-	if (document.addEventListener){
+	/*if (document.addEventListener){
 	//	console.log("Add Event");
   		document.addEventListener("DOMContentLoaded", function(event){
   					console.log("LOADED");
@@ -114,13 +186,13 @@ self.port.on('start',function(message){
 						},false);*/
 						
 						//Uncomment one os these two: Click the button or send message saying someone has clicked the button.
-						listButton.click();
+						//listButton.click();
 						
-						//self.port.emit('tabsClicked','noMessage');
-					}
+						self.port.emit('tabsClicked','noMessage');
+					//}
 					
-  		}, false)
-  	}
+  		//}, false)
+  	//}
   	
   	/*
   	if (document.readyState == "complete" || document.readyState == "loaded" || document.readyState == "interactive") {
@@ -202,7 +274,7 @@ self.port.on('takeTabs',function(tabs){
 	buttonsList = new Array();
 	for(i=0;i<tabs.length;i++){
 		buttonsList[i] = document.getElementById(tabs[i].id);
-		console.log("ID " + tabs[i].id + "  " + tabs[i].title);
+		//console.log("ID " + tabs[i].id + "  " + tabs[i].title);
 		if (buttonsList[i] != null){
 			buttonsList[i].addEventListener('click',function(event){
 				var cookieUL = document.getElementById('cookies');
